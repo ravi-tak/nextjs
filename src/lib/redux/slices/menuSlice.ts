@@ -1,5 +1,6 @@
 'use client'
 
+import { baseURL } from '@/lib/utils'
 import { Node } from '@/types'
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
 
@@ -19,7 +20,7 @@ export const addMenuAsync = createAsyncThunk(
       depth,
       parentId,
     }
-    const res = await fetch('http://localhost:3000/api/menu', {
+    const res = await fetch(`${baseURL}/api/menu`, {
       method: 'POST',
       body: JSON.stringify(menuData),
     })
@@ -31,12 +32,9 @@ export const addMenuAsync = createAsyncThunk(
 export const updateMenuAsync = createAsyncThunk(
   'updateMenu/status',
   async ({ id, name }: { id: string; name: string }) => {
-    const res = await fetch(
-      `http://localhost:3000/api/menu/${id}?name=${name}`,
-      {
-        method: 'PUT',
-      }
-    )
+    const res = await fetch(`${baseURL}/api/menu/${id}?name=${name}`, {
+      method: 'PUT',
+    })
     const data = await res.json()
     return data?.rootNode
   }
@@ -45,7 +43,7 @@ export const updateMenuAsync = createAsyncThunk(
 export const deleteMenuAsync = createAsyncThunk(
   'deleteMenu/status',
   async ({ id }: { id: string }) => {
-    const res = await fetch(`http://localhost:3000/api/menu/${id}`, {
+    const res = await fetch(`${baseURL}/api/menu/${id}`, {
       method: 'DELETE',
     })
     const data = await res.json()

@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import db from '@/db'
-import { fetchMenuTree } from '../route'
+import { fetchMenuTree } from '../utils'
 
 // Update and pass name in search query
 export async function PUT(

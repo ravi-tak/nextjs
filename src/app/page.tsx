@@ -6,9 +6,10 @@ import downArrow from '../../public/down-arrow.svg'
 import Collapse from '@/components/Collapse'
 import FormWrapper from '@/components/FormWrapper'
 import MenuWrapper from '@/components/MenuWrapper'
+import { baseURL } from '@/lib/utils'
 
 export default async function Home() {
-  const res = await fetch('http://localhost:3000/api/menu')
+  const res = await fetch(`${baseURL}/api/menu`)
   const { rootNode } = await res.json()
 
   return (
