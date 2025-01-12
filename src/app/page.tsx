@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import Image from 'next/image'
 import Menu from '@/components/Menu'
 import folder from '../../public/folder.svg'
