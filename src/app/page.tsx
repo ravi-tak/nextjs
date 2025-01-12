@@ -11,9 +11,6 @@ import MenuWrapper from '@/components/MenuWrapper'
 import { baseURL } from '@/lib/utils'
 
 export default async function Home() {
-  console.log('VERCEL_ENV:', process.env.VERCEL_ENV)
-  console.log('VERCEL_URL:', process.env.VERCEL_URL)
-  console.log('BASE_URL:', process.env.NEXT_PUBLIC_BASE_URL)
   const res = await fetch(`${baseURL}/api/menu`)
   const { rootNode } = await res.json()
 
