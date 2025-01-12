@@ -6,6 +6,4 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export const baseURL =
-  process.env.VERCEL_ENV === 'production'
-    ? process.env.NEXT_PUBLIC_BASE_URL
-    : 'http://localhost:3000'
+  process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
