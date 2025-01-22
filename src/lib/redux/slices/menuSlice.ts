@@ -1,7 +1,7 @@
 'use client'
 
 import { baseURL } from '@/lib/utils'
-import { Node } from '@/types'
+import { MenuNode } from '@/types'
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
 
 export const addMenuAsync = createAsyncThunk(
@@ -53,12 +53,12 @@ export const deleteMenuAsync = createAsyncThunk(
 
 type MenuState = {
   showAllMenu: boolean
-  menuTree: Node | undefined
+  menuTree: MenuNode | null
 }
 
 const initialState: MenuState = {
   showAllMenu: true,
-  menuTree: undefined,
+  menuTree: null,
 }
 
 const menuSlice = createSlice({
@@ -75,20 +75,23 @@ const menuSlice = createSlice({
   extraReducers: (builder) => {
     builder
       // Add menu
-      .addCase(addMenuAsync.fulfilled, (state, action: PayloadAction<Node>) => {
-        state.menuTree = action.payload
-      })
+      .addCase(
+        addMenuAsync.fulfilled,
+        (state, action: PayloadAction<MenuNode>) => {
+          state.menuTree = action.payload
+        }
+      )
       //  Update menu
       .addCase(
         updateMenuAsync.fulfilled,
-        (state, action: PayloadAction<Node>) => {
+        (state, action: PayloadAction<MenuNode>) => {
           state.menuTree = action.payload
         }
       )
       //  Delete menu
       .addCase(
         deleteMenuAsync.fulfilled,
-        (state, action: PayloadAction<Node>) => {
+        (state, action: PayloadAction<MenuNode>) => {
           state.menuTree = action.payload
         }
       )

@@ -2,7 +2,6 @@
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
-import { z } from 'zod'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -14,57 +13,57 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { Node } from '@/types'
+import { AddFormData, addFormSchema, MenuNode } from '@/types'
 import { useAppDispatch, useAppSelector } from '@/lib/redux/hooks'
-import { addMenuAsync } from '@/lib/redux/slices/menuSlice'
 import { useEffect } from 'react'
+import { addNode } from '@/actions'
+import { setFormError } from '@/lib/redux/slices/formSlice'
+import { setMenuTree } from '@/lib/redux/slices/menuSlice'
 
-const formSchema = z.object({
-  parentName: z.string(),
-  depth: z.string(),
-  name: z.string().min(1, { message: 'Name must be present.' }),
-})
-
-export default function AddForm({ node }: { node: Node | undefined }) {
+export default function AddForm({ node }: { node: MenuNode | undefined }) {
   const dispatch = useAppDispatch()
-  const menuTree = useAppSelector((state) => state.menu.menuTree)
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const error = useAppSelector((state) => state.form.error)
+  const form = useForm<AddFormData>({
+    resolver: zodResolver(addFormSchema),
     defaultValues: {
       depth: node?.depth?.toString() || '0',
       parentName: node?.name || 'Root Node',
+      parentId: node?.id.toString() || undefined,
       name: '',
     },
   })
 
   const {
+    reset,
     formState: { isSubmitting },
   } = form
-
-  const { reset } = form
   useEffect(() => {
     if (node) {
       reset({
         depth: node.depth?.toString() || '0',
         parentName: node?.name,
+        parentId: node?.id.toString() || undefined,
         name: '',
       })
     }
   }, [node, reset])
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(formData: AddFormData) {
     try {
-      await dispatch(
-        addMenuAsync({
-          name: values.name,
-          depth: menuTree
-            ? parseInt(values.depth, 10) + 1
-            : parseInt(values.depth, 10),
-          parentId: node?.id ? node?.id : undefined,
-        })
-      )
+      const { data, error } = await addNode({
+        ...formData,
+        depth: node ? (parseInt(formData.depth, 10) + 1).toString() : '0',
+        parentId: node?.id ? node?.id.toString() : undefined,
+      })
+      if (error) {
+        dispatch(setFormError(error))
+        reset()
+        return
+      }
+      dispatch(setMenuTree(data))
     } catch (error) {
-      console.error('Error submitting form:', error)
+      console.log('Error submitting form:', error)
+      throw new Error('Something went wrong')
     }
   }
 
@@ -74,6 +73,23 @@ export default function AddForm({ node }: { node: Node | undefined }) {
         onSubmit={form.handleSubmit(onSubmit)}
         className='text-xs flex flex-col gap-3 w-full'
       >
+        <FormField
+          control={form.control}
+          name='parentId'
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <Input
+                  required={false}
+                  className={'opacity-50'}
+                  type='hidden'
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <FormField
           control={form.control}
           name='parentName'
@@ -132,6 +148,7 @@ export default function AddForm({ node }: { node: Node | undefined }) {
         >
           {isSubmitting ? 'Loading' : 'Add'}
         </Button>
+        {typeof error === 'string' && <FormMessage>{error}</FormMessage>}
       </form>
     </Form>
   )

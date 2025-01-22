@@ -5,18 +5,12 @@ import Menu from '@/components/Menu'
 import folder from '../../public/folder.svg'
 import titleIcon from '../../public/title-icon.svg'
 import downArrow from '../../public/down-arrow.svg'
-import Collapse from '@/components/Collapse'
 import FormWrapper from '@/components/FormWrapper'
 import MenuWrapper from '@/components/MenuWrapper'
-import { baseURL } from '@/lib/utils'
+import { getMenus } from '@/actions'
+import { Suspense } from 'react'
 
-export default async function Home() {
-  console.log('VERCEL_ENV:', process.env.VERCEL_ENV)
-  console.log('VERCEL_URL:', process.env.VERCEL_URL)
-  console.log('BASE_URL:', baseURL)
-  const res = await fetch(`${baseURL}/api/menu`)
-  const { rootNode } = await res.json()
-
+export default function Home() {
   return (
     <>
       <section className='flex flex-col lg:flex-row outter-padding gap-8 h-[100vh]'>
@@ -49,8 +43,9 @@ export default async function Home() {
           </div>
           <div className='flex flex-col lg:flex-row gap-10 text-sm'>
             <div className='flex flex-col gap-6 lg:gap-4 w-full'>
-              <Collapse />
-              <MenuWrapper node={rootNode} />
+              <Suspense fallback={<p>Loading...</p>}>
+                <MenuTree />
+              </Suspense>
             </div>
             <FormWrapper />
           </div>
@@ -58,4 +53,9 @@ export default async function Home() {
       </section>
     </>
   )
+}
+
+async function MenuTree() {
+  const rootNode = await getMenus()
+  return <MenuWrapper node={rootNode} />
 }

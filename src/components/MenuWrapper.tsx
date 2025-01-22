@@ -7,8 +7,10 @@ import MenuTree from './MenuTree'
 import addIcon from '../../public/add-icon.svg'
 import { setAddForm } from '@/lib/redux/slices/formSlice'
 import Image from 'next/image'
+import { MenuNode } from '@/types'
+import Collapse from './Collapse'
 
-export default function MenuWrapper({ node }: { node: Node }) {
+export default function MenuWrapper({ node }: { node: MenuNode | null }) {
   const rootNode = useAppSelector((state) => state.menu.menuTree)
   const dispatch = useAppDispatch()
 
@@ -32,5 +34,10 @@ export default function MenuWrapper({ node }: { node: Node }) {
       </>
     )
 
-  return <>{rootNode && <MenuTree node={rootNode} />}</>
+  return (
+    <>
+      <Collapse />
+      <MenuTree node={rootNode} />
+    </>
+  )
 }

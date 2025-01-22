@@ -9,17 +9,19 @@ import trashIcon from '../../public/trash-icon.svg'
 import { useAppDispatch, useAppSelector } from '@/lib/redux/hooks'
 import {
   setAddForm,
+  setFormError,
   setNode,
   setUpdateForm,
 } from '@/lib/redux/slices/formSlice'
-import { Node } from '@/types'
-import { deleteMenuAsync } from '@/lib/redux/slices/menuSlice'
+import { MenuNode } from '@/types'
+import { setMenuTree } from '@/lib/redux/slices/menuSlice'
+import { deleteNode } from '@/actions'
 
 export default function MenuTree({
   node,
   showLine = true,
 }: {
-  node: Node
+  node: MenuNode
   showLine?: boolean
 }) {
   const dispatch = useAppDispatch()
@@ -45,6 +47,20 @@ export default function MenuTree({
       ...prev,
       showIcons: isEntering,
     }))
+  }
+
+  async function deleteMenu(id: number) {
+    try {
+      const { data, error } = await deleteNode(id)
+      if (error) {
+        dispatch(setFormError(error))
+        return
+      }
+      dispatch(setMenuTree(data))
+    } catch (error) {
+      console.error('Error submitting form:', error)
+      throw new Error('Something went wrong')
+    }
   }
 
   return (
@@ -99,11 +115,7 @@ export default function MenuTree({
                   height={20}
                 />
               </button>
-              <button
-                onClick={() => {
-                  dispatch(deleteMenuAsync({ id: node?.id.toString() }))
-                }}
-              >
+              <button onClick={() => deleteMenu(node?.id)}>
                 <Image
                   src={trashIcon}
                   alt='trash Iocn'

@@ -2,7 +2,6 @@
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
-import { z } from 'zod'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -14,21 +13,17 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { Node } from '@/types'
+import { editFormSchema, EditFormData, MenuNode } from '@/types'
 import { useAppDispatch } from '@/lib/redux/hooks'
-import { updateMenuAsync } from '@/lib/redux/slices/menuSlice'
 import { useEffect } from 'react'
+import { updateNode } from '@/actions'
+import { setFormError } from '@/lib/redux/slices/formSlice'
+import { setMenuTree } from '@/lib/redux/slices/menuSlice'
 
-const formSchema = z.object({
-  menuId: z.string(),
-  depth: z.string(),
-  name: z.string().min(1, { message: 'Name must be present.' }),
-})
-
-export default function EditForm({ node }: { node: Node | undefined }) {
+export default function EditForm({ node }: { node: MenuNode | undefined }) {
   const dispatch = useAppDispatch()
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<EditFormData>({
+    resolver: zodResolver(editFormSchema),
     defaultValues: {
       menuId: node?.id?.toString() || 'ID',
       depth: node?.depth?.toString() || '0',
@@ -37,10 +32,9 @@ export default function EditForm({ node }: { node: Node | undefined }) {
   })
 
   const {
+    reset,
     formState: { isSubmitting },
   } = form
-
-  const { reset } = form
   useEffect(() => {
     if (node) {
       reset({
@@ -51,11 +45,18 @@ export default function EditForm({ node }: { node: Node | undefined }) {
     }
   }, [node, reset])
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(formData: EditFormData) {
     try {
-      await dispatch(updateMenuAsync({ id: values.menuId, name: values.name }))
+      const { data, error } = await updateNode(formData)
+      if (error) {
+        dispatch(setFormError(error))
+        reset()
+        return
+      }
+      dispatch(setMenuTree(data))
     } catch (error) {
       console.error('Error submitting form:', error)
+      throw new Error('Something went wrong')
     }
   }
 

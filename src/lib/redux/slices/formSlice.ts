@@ -1,18 +1,20 @@
 'ues client'
 
-import { Node } from '@/types'
+import { FormError, MenuNode } from '@/types'
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 
 type FormState = {
   addForm: boolean
   updateForm: boolean
-  node: Node | undefined
+  node: MenuNode | undefined
+  error: FormError
 }
 
 const initialState: FormState = {
   addForm: false,
   updateForm: false,
   node: undefined,
+  error: null,
 }
 
 const formSlice = createSlice({
@@ -29,11 +31,15 @@ const formSlice = createSlice({
       state.addForm = false
       state.updateForm = false
     },
-    setNode: (state, action: PayloadAction<Node>) => {
+    setNode: (state, action: PayloadAction<MenuNode>) => {
       state.node = action.payload
+    },
+    setFormError: (state, action: PayloadAction<FormError>) => {
+      state.error = action.payload
     },
   },
 })
 
-export const { setAddForm, setUpdateForm, closeForm, setNode } = formSlice.actions
+export const { setAddForm, setUpdateForm, closeForm, setNode, setFormError } =
+  formSlice.actions
 export default formSlice.reducer
